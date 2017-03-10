@@ -1,0 +1,23 @@
+#!/bin/bash
+FILENAME="$1"
+shift 1
+ARG="$*"
+
+(nc -ul localhost 3333 | while read line; do echo $line | grep drop_frame | cut -d"=" -f2 | \
+  if [[ $(< /dev/stdin) -gt 0 ]];
+  then
+    echo "FRAMEDROP DETECTED, killing ffmpeg gracefully";
+    terminal-notifier -title "FFMPEG" -message "FRAMEDROP DETECTED, killing ffmpeg"
+    say "FRAMEDROP DETECED captain, killing ffmpeg gracefully"
+    #gracefully kill ffmpeg
+    kill -SIGINT `pidof ffmpeg`;
+    exit 1;
+  fi;
+done;)&
+
+bmdcapture -d 0 -m 2 -A 2 -V 4 -p yuv10 -F nut -f pipe:1 | \
+  ffmpeg -y -r 25.0 -i - -c:v prores_ks -profile:v lt -c:a pcm_s16le -movflags faststart -r 25.0 -vsync 2 -async 1 -threads 8 -progress udp://localhost:3333 "$FILENAME".mov -vcodec mpeg2video -acodec mp2 -b:v 12M -pix_fmt yuv420p -f mpegts udp://172.23.4.14:12000
+
+#tee >(ffmpeg -y -r 25.0 -i - -filter_complex "scale=640:-1[scale];[scale]drawtext=fontfile=/Users/digilab/Documents/executive.otf:x=225:y=40:box=1:boxcolor=black@0.5:boxborderw=10:fontcolor=white:fontsize=35:r=25:timecode=\'00:00:00:00\'[tc];[tc]drawtext=fontfile=/Users/digilab/Documents/executive.otf:x=(main_w-text_w*1.5):y=(main_h-text_h*2):fontcolor=white:fontsize=35:text=NFA" -pix_fmt yuv420p -refs 4 -map_metadata -1 -movflags +faststart -b:v 1500k -b:a 128k -c:v h264 -c:a aac -threads 8 FFMPEG_SCREENER.mp4) | \
+  #tee >(ffmpeg -y -r 25.0 -i - -vf "scale=512:-1[out]" -r 25.0 -vcodec theora -acodec vorbis -b:v 1500K -vsync 2 -async 1 -strict -2 -f ogg - | oggfwd -p -n "NFA Capture" 172.23.9.70 8000 cigareta /nfa_preview.ogv) |\
+  #mpv -

@@ -1,0 +1,11 @@
+#!/bin/bash
+if [ "$#" -ne 2 ]; then
+  echo "Usage: frac HH:MM:SS:FF FPS" >&2
+  exit 1
+fi
+
+
+FRAG=`echo 1/$2 | bc -l`
+FRAC=$(echo "`echo "$1" | awk -F':' '{print $4}'` * $FRAG" | bc -l)
+COMPLETE=`echo $1 | awk -F':' '{print $1, $2, $3}' | while read H M S; do echo "$H:$M:$S$FRAC" ;done`
+echo $COMPLETE

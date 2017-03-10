@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [ "$#" -ne 3 ]; then
+  echo "Usage: shotlist source_filename list_tc_frames FPS" >&2
+  exit 1
+fi
+
+
+for i in `cat $2`; do FRAC=`frac $i $3`; ffmpeg -ss "$FRAC" -i "$1" -vframes 1 "`basename -s .mov $1`_$i".jpg ; done

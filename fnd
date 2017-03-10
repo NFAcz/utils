@@ -1,0 +1,13 @@
+#!/bin/bash
+NAME="*$1*"
+UPCS="`echo $NAME | tr [:lower:] [:upper:]`"
+
+find /Volumes/F -name "$UPCS"
+find /Volumes/central -name "$UPCS"
+find /Volumes/DTL03DATA/DTL03Share/ -name "$UPCS"
+find /Volumes/DTL03DATA2/ -name "$UPCS"
+
+find /Volumes/F -name "$NAME"
+find /Volumes/central -name "$NAME"
+find /Volumes/DTL03DATA/DTL03Share/ -name "$NAME"
+find /Volumes/DTL03DATA2/-name "$NAME"
